@@ -18,10 +18,7 @@ jobs:
           npm install  # 安装依赖
           # npm audit fix || true # 忽略安全漏洞
           npm run build  # 执行打包
-          pwd
-          ls
-          ls ./dist
-          tar -czvf dist.tar dist # 目标文件进行打包
+          tar -czvf dist.tar.gz dist # 目标文件进行打包
       
       # 創建發佈
       - name: Create Release
@@ -53,8 +50,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist.tar
-          asset_name: dist.tar
+          asset_path: ./dist.tar.gz
+          asset_name: dist.tar.gz
           asset_content_type: application/octet-stream
           
       # - name: Deploy 🚀
