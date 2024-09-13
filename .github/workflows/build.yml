@@ -18,6 +18,9 @@ jobs:
           npm install  # 安装依赖
           # npm audit fix || true # 忽略安全漏洞
           npm run build  # 执行打包
+          pwd
+          ls
+          ls ./dist
           tar -czvf dist.tar dist # 目标文件进行打包
       
       # 創建發佈
