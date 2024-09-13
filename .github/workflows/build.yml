@@ -16,7 +16,7 @@ jobs:
       - name: Install and Build 🔧 # This example project is built using npm and outputs the result to the 'build' folder. Replace with the commands required to build your project, or remove this step entirely if your site is pre-built.
         run: |
           npm install  # 安装依赖
-          npm audit fix # 忽略安全漏洞
+          # npm audit fix || true # 忽略安全漏洞
           npm run build  # 执行打包
           tar -czvf dist.tar dist # 目标文件进行打包
       
