@@ -1,0 +1,74 @@
+name: build web
+on: 
+  push: 
+    branches: 
+      - main
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2 # If you're using actions/checkout@v2 you must set persist-credentials to false in most cases for the deployment to work correctly.
+        with:
+          persist-credentials: false
+
+      - name: Install and Build 🔧 # This example project is built using npm and outputs the result to the 'build' folder. Replace with the commands required to build your project, or remove this step entirely if your site is pre-built.
+        run: |
+          npm install  # 安装依赖
+          npm audit fix # 忽略安全漏洞
+          npm run build  # 执行打包
+          tar -czvf dist.tar dist # 目标文件进行打包
+      
+      # 創建發佈
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN : ${{secrets.GITHUB_TOKEN}}
+        with:
+          #token: ${{ secrets.Releases }}
+          #tag_name: v1.0.0
+          #release_name: Release 1.0.0
+          #draft: false
+          #prerelease: false
+          tag_name: v${{ github.run_id }}
+          release_name: v${{ github.run_id }}
+          # body: |
+          #   Auto-generated build
+          #   [⭐Update⭐]
+          #   ${{ steps.get_update_description.outputs.update_description }}
+          body_path: ${{ github.workspace }}/README.md
+          draft: false
+          prerelease: false
+      
+      #上傳資產到發佈中
+      - name: Upload Release Assets
+        id: upload_assets_sha
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist.tar
+          asset_name: dist.tar
+          asset_content_type: application/octet-stream
+          
+      # - name: Deploy 🚀
+      #   uses: cross-the-world/ssh-scp-ssh-pipelines@latest # 因为构建之后，需要把代码上传到服务器上，所以需要连接到ssh，并且做一个安全拷贝(security copy)操作
+      #   env:
+      #     WELCOME: "ssh scp ssh pipelines"
+      #     LASTSSH: "Doing something after copying"
+      #   with:
+      #    host: ${{ secrets.DR_HOST }}
+      #    user: ${{ secrets.DR_USER }}
+      #    pass: ${{ secrets.DR_PASS }}
+      #    port: ${{ secrets.DR_PORT }}
+      #    connect_timeout: 10s
+      #    first_ssh: |
+      #       rm -rf /usr/local/webserver/nginx/html/dist
+      #       mkdir -p /usr/local/webserver/nginx/html/dist
+      #    scp: |
+      #      './packages/demoPro/dist.tar' => /usr/local/webserver/nginx/html
+      #    last_ssh: |
+      #       cd /usr/local/webserver/nginx/html # 切换到部署目录
+      #       tar -xzvf dist.tar  # 将 tar 打包文件进行解压到当前部署目录
